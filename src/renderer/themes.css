@@ -354,6 +354,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textSolarizedDarkSmall.svg');
 }
 
+.mainSystemAccentColor.systemAccentColorTextWhite,
 .mainRed,
 .mainPink,
 .mainPurple,
@@ -369,6 +370,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text-bar-color: url('../../_icons/textWhiteSmall.svg');
 }
 
+.mainSystemAccentColor.systemAccentColorTextBlack,
 .mainLightGreen,
 .mainLime,
 .mainYellow,
@@ -378,6 +380,12 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --text-with-main-color: #000;
   --logo-icon-bar-color: url('../../_icons/iconBlackSmall.svg');
   --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
+}
+
+.mainSystemAccentColor {
+  --primary-color: var(--system-accent-color);
+  --primary-color-hover: var(--system-accent-color);
+  --primary-color-active: var(--system-accent-color);
 }
 
 .mainRed {
@@ -704,6 +712,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --primary-color-active: #c5d940;
 }
 
+.secSystemAccentColor.systemAccentColorTextWhite,
 .secRed,
 .secPink,
 .secPurple,
@@ -717,6 +726,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --text-with-accent-color: #fff;
 }
 
+.secSystemAccentColor.systemAccentColorTextBlack,
 .secLightGreen,
 .secLime,
 .secYellow,
@@ -724,6 +734,18 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .secOrange,
 .secDeepOrange {
   --text-with-accent-color: #000;
+}
+
+.secSystemAccentColor {
+  --accent-color: var(--system-accent-color);
+  --accent-color-hover: var(--system-accent-color);
+  --accent-color-active: var(--system-accent-color);
+  --accent-color-light: var(--system-accent-color);
+  --accent-color-visited: var(--system-accent-color);
+  --accent-color-opacity1: color-mix(in srgb, var(--system-accent-color) 4%, transparent);
+  --accent-color-opacity2: color-mix(in srgb, var(--system-accent-color) 12%, transparent);
+  --accent-color-opacity3: color-mix(in srgb, var(--system-accent-color) 16%, transparent);
+  --accent-color-opacity4: color-mix(in srgb, var(--system-accent-color) 24%, transparent);
 }
 
 .secRed {

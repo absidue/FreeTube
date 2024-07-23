@@ -58,6 +58,7 @@ const state = {
   lastCommunityRefreshTimestampByProfile: {},
   lastPopularRefreshTimestamp: '',
   lastTrendingRefreshTimestamp: '',
+  isSystemAccentColorSupported: false
 }
 
 const getters = {
@@ -180,6 +181,10 @@ const getters = {
   getLastVideoRefreshTimestampByProfile: (state) => (profileId) => {
     return state.lastVideoRefreshTimestampByProfile[profileId]
   },
+
+  getIsSystemAccentColorSupported(state) {
+    return state.isSystemAccentColorSupported
+  }
 }
 
 const actions = {
@@ -969,6 +974,10 @@ const mutations = {
 
   setExternalPlayerCmdArguments (state, value) {
     state.externalPlayerCmdArguments = value
+  },
+
+  setIsSystemAccentColorSupported(state, value) {
+    state.isSystemAccentColorSupported = value
   }
 }
 

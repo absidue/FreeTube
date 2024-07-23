@@ -1,7 +1,8 @@
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session, shell,
-  nativeTheme, net, protocol, clipboard
+  nativeTheme, net, protocol, clipboard,
+  systemPreferences
 } from 'electron'
 import path from 'path'
 import cp from 'child_process'
@@ -14,6 +15,7 @@ import {
 } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
+import { getLinuxAccentColor } from './linux-accent-color'
 import { existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
@@ -899,6 +901,32 @@ function runApp() {
     // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
     return app.getSystemLocale()
   })
+
+  ipcMain.handle(IpcChannels.GET_SYSTEM_ACCENT_COLOR, () => {
+    // Electron doesn't support the API on Linux
+    // https://www.electronjs.org/docs/latest/api/system-preferences#systempreferencesgetaccentcolor-windows-macos
+    if (process.platform === 'win32' || process.platform === 'darwin') {
+      // Use substring to remove alpha channel (opacity) from the color
+      return '#' + systemPreferences.getAccentColor().substring(0, 6)
+    } else {
+      return getLinuxAccentColor()
+    }
+  })
+
+  // Electron only supports this event on Windows
+  // https://www.electronjs.org/docs/latest/api/system-preferences#event-accent-color-changed-windows
+  if (process.platform === 'win32') {
+    systemPreferences.on('accent-color-changed', (_, newAccentColor) => {
+      const allWindows = BrowserWindow.getAllWindows()
+
+      // Use substring to remove alpha channel (opacity) from the color
+      const systemAccentColor = '#' + newAccentColor.substring(0, 6)
+
+      allWindows.forEach((window) => {
+        window.webContents.send(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, systemAccentColor)
+      })
+    })
+  }
 
   ipcMain.handle(IpcChannels.GET_PICTURES_PATH, () => {
     return app.getPath('pictures')

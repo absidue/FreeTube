@@ -37,7 +37,10 @@ const IpcChannels = {
   SHOW_VIDEO_STATISTICS: 'show-video-statistics',
 
   PLAYER_CACHE_GET: 'player-cache-get',
-  PLAYER_CACHE_SET: 'player-cache-set'
+  PLAYER_CACHE_SET: 'player-cache-set',
+
+  GET_SYSTEM_ACCENT_COLOR: 'get-system-accent-color',
+  SYSTEM_ACCENT_COLOR_UPDATED: 'system-accent-color-updated'
 }
 
 const DBActions = {

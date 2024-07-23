@@ -16,6 +16,7 @@ import { IpcChannels } from '../constants'
 import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import { translateWindowTitle } from './helpers/strings'
+import { calculateColorLuminance } from './helpers/colors'
 
 let ipcRenderer = null
 
@@ -113,12 +114,28 @@ export default defineComponent({
       return this.$store.getters.getHideLabelsSideBar
     },
 
+    isSystemAccentColorSupported: function () {
+      return this.$store.getters.getIsSystemAccentColorSupported
+    },
+
     mainColor: function () {
-      return this.$store.getters.getMainColor
+      let color = this.$store.getters.getMainColor
+
+      if ((!process.env.IS_ELECTRON || !this.isSystemAccentColorSupported) && color === 'SystemAccentColor') {
+        color = 'Red'
+      }
+
+      return color
     },
 
     secColor: function () {
-      return this.$store.getters.getSecColor
+      let color = this.$store.getters.getSecColor
+
+      if ((!process.env.IS_ELECTRON || !this.isSystemAccentColorSupported) && color === 'SystemAccentColor') {
+        color = 'Blue'
+      }
+
+      return color
     },
 
     locale: function() {
@@ -147,11 +164,17 @@ export default defineComponent({
   watch: {
     windowTitle: 'setWindowTitle',
 
-    baseTheme: 'checkThemeSettings',
+    baseTheme: function () {
+      this.checkThemeSettings()
+    },
 
-    mainColor: 'checkThemeSettings',
+    mainColor: function () {
+      this.checkThemeSettings()
+    },
 
-    secColor: 'checkThemeSettings',
+    secColor: function () {
+      this.checkThemeSettings()
+    },
 
     locale: 'setLocale',
   },
@@ -187,6 +210,7 @@ export default defineComponent({
           this.enableSetSearchQueryText()
           this.enableOpenUrl()
           this.watchSystemTheme()
+          this.checkIfSystemAccentColorIsSupported()
           await this.checkExternalPlayer()
         }
 
@@ -206,19 +230,36 @@ export default defineComponent({
     })
   },
   methods: {
-    checkThemeSettings: function () {
+    checkThemeSettings: function (systemAccentColor = undefined) {
       const theme = {
         baseTheme: this.baseTheme || 'dark',
-        mainColor: this.mainColor || 'mainRed',
-        secColor: this.secColor || 'secBlue'
+        mainColor: this.mainColor || 'Red',
+        secColor: this.secColor || 'Blue'
       }
 
-      this.updateTheme(theme)
+      this.updateTheme(theme, systemAccentColor)
     },
 
-    updateTheme: function (theme) {
+    updateTheme: async function (theme, systemAccentColor = undefined) {
       document.body.className = `${theme.baseTheme} main${theme.mainColor} sec${theme.secColor}`
       document.body.dataset.systemTheme = this.systemTheme
+
+      if (process.env.IS_ELECTRON && (theme.mainColor === 'SystemAccentColor' || theme.secColor === 'SystemAccentColor')) {
+        if (typeof systemAccentColor === 'undefined') {
+          const { ipcRenderer } = require('electron')
+          systemAccentColor = await ipcRenderer.invoke(IpcChannels.GET_SYSTEM_ACCENT_COLOR)
+        }
+
+        document.body.style.setProperty('--system-accent-color', systemAccentColor)
+
+        const textColor = calculateColorLuminance(systemAccentColor)
+
+        if (textColor === '#000000') {
+          document.body.className += ' systemAccentColorTextBlack'
+        } else {
+          document.body.className += ' systemAccentColorTextWhite'
+        }
+      }
     },
 
     checkForNewUpdates: function () {
@@ -487,6 +528,19 @@ export default defineComponent({
       ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (event, shouldUseDarkColors) => {
         document.body.dataset.systemTheme = shouldUseDarkColors ? 'dark' : 'light'
       })
+
+      // Only supported on Windows
+      if (process.env.IS_ELECTRON && process.platform === 'win32') {
+        ipcRenderer.on(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, (_, newAccentColor) => {
+          this.checkThemeSettings(newAccentColor)
+        })
+      }
+    },
+
+    checkIfSystemAccentColorIsSupported: async function () {
+      const systemAccentColor = await ipcRenderer.invoke(IpcChannels.GET_SYSTEM_ACCENT_COLOR)
+
+      this.$store.commit('setIsSystemAccentColorSupported', typeof systemAccentColor === 'string')
     },
 
     enableSetSearchQueryText: function () {

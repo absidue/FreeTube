@@ -59,12 +59,28 @@ export default defineComponent({
       return this.$store.getters.getBaseTheme
     },
 
+    isSystemAccentColorSupported: function () {
+      return this.$store.getters.getIsSystemAccentColorSupported
+    },
+
     mainColor: function () {
-      return this.$store.getters.getMainColor
+      let color = this.$store.getters.getMainColor
+
+      if ((!process.env.IS_ELECTRON || !this.isSystemAccentColorSupported) && color === 'SystemAccentColor') {
+        color = 'Red'
+      }
+
+      return color
     },
 
     secColor: function () {
-      return this.$store.getters.getSecColor
+      let color = this.$store.getters.getSecColor
+
+      if ((!process.env.IS_ELECTRON || !this.isSystemAccentColorSupported) && color === 'SystemAccentColor') {
+        color = 'Blue'
+      }
+
+      return color
     },
 
     isSideNavOpen: function () {
@@ -123,11 +139,25 @@ export default defineComponent({
     },
 
     colorValues: function () {
-      return colors.map(color => color.name)
+      if (process.env.IS_ELECTRON && this.isSystemAccentColorSupported) {
+        return [
+          'SystemAccentColor',
+          ...colors.map(color => color.name)
+        ]
+      } else {
+        return colors.map(color => color.name)
+      }
     },
 
     colorNames: function () {
-      return getColorTranslations()
+      if (process.env.IS_ELECTRON && this.isSystemAccentColorSupported) {
+        return [
+          this.$t('Settings.Theme Settings.Main Color Theme.System Accent Color'),
+          ...getColorTranslations()
+        ]
+      } else {
+        return getColorTranslations()
+      }
     },
 
     areColorThemesEnabled: function() {
