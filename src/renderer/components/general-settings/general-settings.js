@@ -208,14 +208,7 @@ export default defineComponent({
   },
   beforeDestroy: function () {
     if (this.currentInvidiousInstance === '') {
-      // FIXME: If we call an action from here, there's no guarantee it will finish
-      // before the component is destroyed, which could bring up some problems
-      // Since I can't see any way to await it (because lifecycle hooks must be
-      // synchronous), unfortunately, we have to copy/paste the logic
-      // from the `setRandomCurrentInvidiousInstance` action onto here
-      const instanceList = this.invidiousInstancesList
-      const randomIndex = Math.floor(Math.random() * instanceList.length)
-      this.setCurrentInvidiousInstance(instanceList[randomIndex])
+      this.setRandomCurrentInvidiousInstance()
     }
   },
   methods: {
@@ -255,7 +248,8 @@ export default defineComponent({
     },
 
     ...mapMutations([
-      'setCurrentInvidiousInstance'
+      'setCurrentInvidiousInstance',
+      'setRandomCurrentInvidiousInstance'
     ]),
 
     ...mapActions([

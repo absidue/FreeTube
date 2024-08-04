@@ -1,4 +1,4 @@
-import { createWebURL, fetchWithTimeout } from '../../helpers/utils'
+import { createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
 
 const state = {
   currentInvidiousInstance: '',
@@ -56,12 +56,6 @@ const actions = {
         console.error(err)
       }
     }
-  },
-
-  setRandomCurrentInvidiousInstance({ commit, state }) {
-    const instanceList = state.invidiousInstancesList
-    const randomIndex = Math.floor(Math.random() * instanceList.length)
-    commit('setCurrentInvidiousInstance', instanceList[randomIndex])
   }
 }
 
@@ -72,6 +66,10 @@ const mutations = {
 
   setInvidiousInstancesList(state, value) {
     state.invidiousInstancesList = value
+  },
+
+  setRandomCurrentInvidiousInstance(state) {
+    state.currentInvidiousInstance = randomArrayItem(state.invidiousInstancesList)
   }
 }
 

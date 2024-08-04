@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue'
-import { mapActions } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/top-nav/top-nav.vue'
 import SideNav from './components/side-nav/side-nav.vue'
@@ -166,7 +166,7 @@ export default defineComponent({
 
       await this.fetchInvidiousInstancesFromFile()
       if (this.defaultInvidiousInstance === '') {
-        await this.setRandomCurrentInvidiousInstance()
+        this.setRandomCurrentInvidiousInstance()
       }
 
       this.fetchInvidiousInstances().then(e => {
@@ -545,13 +545,16 @@ export default defineComponent({
       'getExternalPlayerCmdArgumentsData',
       'fetchInvidiousInstances',
       'fetchInvidiousInstancesFromFile',
-      'setRandomCurrentInvidiousInstance',
       'setupListenersToSyncWindows',
       'updateBaseTheme',
       'updateMainColor',
       'updateSecColor',
       'showOutlines',
       'hideOutlines',
+    ]),
+
+    ...mapMutations([
+      'setRandomCurrentInvidiousInstance'
     ])
   }
 })
