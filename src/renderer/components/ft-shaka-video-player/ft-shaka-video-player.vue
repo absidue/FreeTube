@@ -22,6 +22,8 @@
       @canplay="handleCanPlay"
       @volumechange="updateVolume"
       @timeupdate="handleTimeupdate"
+      @playing="handlePlaying"
+      @waiting="handleWaiting"
     />
     <!--
       VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection

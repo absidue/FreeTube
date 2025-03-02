@@ -2284,18 +2284,29 @@ export default defineComponent({
 
       logShakaError(error, context, props.videoId, details)
 
-      // text related errors aren't serious (captions and seek bar thumbnails), so we should just log them
-      // TODO: consider only emitting when the severity is crititcal?
-      if (!ignoreErrors && error.category !== shaka.util.Error.Category.TEXT) {
-        // don't react to multiple consecutive errors, otherwise we don't give the format fallback from the previous error a chance to work
-        ignoreErrors = true
+      if (!ignoreErrors) {
+        if (
+          error.code === shaka.util.Error.Code.TIMEOUT &&
+          error.severity === shaka.util.Error.Severity.CRITICAL &&
+          error.data[1] === RequestType.SEGMENT
+        ) {
+          lastRequestTimedOut.value = true
 
-        emit('error', error)
+        // eslint-disable-next-line @stylistic/brace-style
+        }
+        // text related errors aren't serious (captions and seek bar thumbnails), so we should just log them
+        // TODO: consider only emitting when the severity is crititcal?
+        else if (error.category !== shaka.util.Error.Category.TEXT) {
+          // don't react to multiple consecutive errors, otherwise we don't give the format fallback from the previous error a chance to work
+          ignoreErrors = true
 
-        stopPowerSaveBlocker()
+          emit('error', error)
 
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'none'
+          stopPowerSaveBlocker()
+
+          if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'none'
+          }
         }
       }
     }
@@ -2375,6 +2386,8 @@ export default defineComponent({
 
     const isOffline = ref(!navigator.onLine)
     const isBuffering = ref(false)
+    const isWaiting = ref(false)
+    const lastRequestTimedOut = ref(false)
 
     function onlineHandler() {
       isOffline.value = false
@@ -2387,11 +2400,27 @@ export default defineComponent({
     window.addEventListener('online', onlineHandler)
     window.addEventListener('offline', offlineHandler)
 
+    function handlePlaying() {
+      isWaiting.value = false
+      lastRequestTimedOut.value = false
+    }
+
+    function handleWaiting() {
+      // Waiting is also fired while seeking so even if we are offline, if the user seeks inside a buffered area we are okay.
+      // If the user seeks into an unbuffered area while offline it will get caught by the buffering event.
+
+      // This is only to catch edge cases where there is not enough data in the buffer (e.g. 0.001 seconds) to keep playing
+      // but it is not completely empty so shaka-player doesn't fire the buffering event.
+      if (!video.value.seeking) {
+        isWaiting.value = true
+      }
+    }
+
     // Only display the offline message while buffering/the loading symbol is visible.
     // If we briefly lose the connection but it comes back before the buffer is empty,
     // the user won't notice anything so we don't need to display the message.
     const showOfflineMessage = computed(() => {
-      return isOffline.value && isBuffering.value
+      return (isOffline.value || lastRequestTimedOut.value) && (isBuffering.value || isWaiting.value)
     })
 
     // #endregion offline message
@@ -2967,6 +2996,8 @@ export default defineComponent({
       handleEnded,
       updateVolume,
       handleTimeupdate,
+      handlePlaying,
+      handleWaiting,
 
       valueChangeMessage,
       valueChangeIcon,
