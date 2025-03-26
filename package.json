@@ -2,7 +2,7 @@
   "name": "freetube",
   "productName": "FreeTube",
   "description": "A private YouTube client",
-  "version": "0.23.2",
+  "version": "0.23.3",
   "license": "AGPL-3.0-or-later",
   "main": "./dist/main.js",
   "private": true,
@@ -51,7 +51,7 @@
     "postinstall": "run-s --silent rebuild:electron patch-shaka",
     "rebuild:electron": "electron-builder install-app-deps",
     "release": "run-s test build",
-    "ci": "yarn install --silent --frozen-lockfile"
+    "ci": "yarn install --silent --frozen-lockfile --network-concurrency 1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -67,14 +67,14 @@
     "path-browserify": "^1.0.1",
     "portal-vue": "^2.1.7",
     "process": "^0.11.10",
-    "shaka-player": "^4.14.2",
+    "shaka-player": "^4.14.3",
     "swiper": "^11.2.6",
     "vue": "^2.7.16",
     "vue-i18n": "^8.28.2",
     "vue-observe-visibility": "^1.0.0",
     "vue-router": "^3.6.5",
     "vuex": "^3.6.2",
-    "youtubei.js": "^13.1.0"
+    "youtubei.js": "^13.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
@@ -91,8 +91,8 @@
     "electron-builder": "^25.1.8",
     "eslint": "^9.23.0",
     "eslint-plugin-jsdoc": "^50.6.9",
-    "eslint-plugin-jsonc": "^2.19.1",
-    "eslint-plugin-unicorn": "^57.0.0",
+    "eslint-plugin-jsonc": "^2.20.0",
+    "eslint-plugin-unicorn": "^58.0.0",
     "eslint-plugin-vue": "^10.0.0",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",
     "eslint-plugin-yml": "^1.17.0",
@@ -100,7 +100,7 @@
     "html-webpack-plugin": "^5.6.3",
     "js-yaml": "^4.1.0",
     "json-minimizer-webpack-plugin": "^5.0.0",
-    "lefthook": "^1.11.3",
+    "lefthook": "^1.11.4",
     "mini-css-extract-plugin": "^2.9.2",
     "neostandard": "^0.12.1",
     "npm-run-all2": "^7.0.2",
